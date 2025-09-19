@@ -1,5 +1,6 @@
 # coding:utf-8
 
+from typing import List
 from typing import Optional
 
 from dnslib import A
@@ -71,9 +72,15 @@ class RecordCNAME(Record):
                   ttl=int(self.lease) if ttl is None else ttl)
 
 
+class Addresses():
+    def __init__(self):
+        pass
+
+
 class Resources():
     def __init__(self, domain_name: str):
         self.__name: Name = Name(domain_name)
+        self.__rec_a: List[RecordA] = []
 
     @property
     def name(self) -> Name:

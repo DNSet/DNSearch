@@ -1,2 +1,3 @@
 xkits-command>=0.4.4
+xkits-network>=0.1.0
 dnslib
