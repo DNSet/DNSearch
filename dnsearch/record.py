@@ -9,6 +9,7 @@ from dnslib import CNAME
 from dnslib import QTYPE
 from dnslib import RR
 from xkits_lib import LiveMeter
+from xkits_network import Peer
 
 from dnsearch.domain import Name
 
@@ -36,7 +37,19 @@ class Record(LiveMeter):
         raise NotImplementedError
 
 
-class RecordA(Record):
+class AddressRecord(Record):
+    def __init__(self, name: Name, data: str, ttl: int):
+        super().__init__(name=name, data=data, ttl=ttl)
+        self.__peer: Optional[Peer] = None
+
+    @property
+    def peer(self) -> Peer:
+        if self.__peer is None:
+            self.__peer = Peer.from_string(address=self.data)
+        return self.__peer
+
+
+class RecordA(AddressRecord):
     """Address Record"""
     RTYPE: int = QTYPE.A
 
@@ -48,7 +61,7 @@ class RecordA(Record):
                   ttl=int(self.lease) if ttl is None else ttl)
 
 
-class RecordAAAA(Record):
+class RecordAAAA(AddressRecord):
     """Quad-A Record"""
     RTYPE: int = QTYPE.AAAA
 
@@ -56,7 +69,7 @@ class RecordAAAA(Record):
         super().__init__(name=name, data=ipv6, ttl=ttl)
 
     def answer(self, ttl: Optional[int] = None) -> RR:
-        return RR(rname=self.name, rtype=self.RTYPE, rdata=CNAME(self.data),
+        return RR(rname=self.name, rtype=self.RTYPE, rdata=AAAA(self.data),
                   ttl=int(self.lease) if ttl is None else ttl)
 
 
@@ -68,7 +81,7 @@ class RecordCNAME(Record):
         super().__init__(name=name, data=cname, ttl=ttl)
 
     def answer(self, ttl: Optional[int] = None) -> RR:
-        return RR(rname=self.name, rtype=self.RTYPE, rdata=AAAA(self.data),
+        return RR(rname=self.name, rtype=self.RTYPE, rdata=CNAME(self.data),
                   ttl=int(self.lease) if ttl is None else ttl)
 
 
